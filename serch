@@ -1,0 +1,26 @@
+#!/bin/sh
+
+### Searching tool
+### Author Michael Kowalski (2017)
+### Searches for a string or a filename
+
+flag=$1
+param=$2
+
+case "$1" in
+        -f)
+            echo "search for file"
+		find . -name "$2"
+            ;;
+        -s)
+		find . -type f -exec grep -l "$2" {} +
+            ;;
+	--help)
+		echo $0 "Usage: {-f|-s}"
+		echo "-f | searches for a FILENAME recursively"
+		echo "-s | searches for a STRING recursively"
+	    ;;
+        *)
+            echo "Usage: {-f|-s}"
+            exit 1
+esac
