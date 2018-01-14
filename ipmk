@@ -1,0 +1,2 @@
+#!/bin/sh
+ifconfig | grep "inet addr" | head -1 | awk -F "addr:" '{print $2}' | awk -F " " '{print $1}'
