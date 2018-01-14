@@ -1,0 +1,2 @@
+### Apache2 Restart  ###
+sudo /etc/init.d/apache2 restart
