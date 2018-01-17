@@ -8,19 +8,37 @@ flag=$1
 param=$2
 
 case "$1" in
+
+	# Search for FILE (sudo optional)
         -f)
-            echo "search for file"
+            	echo "search for file"
 		find . -name "$2"
-            ;;
+        ;;
+	-fr)
+		echo "search for file with SUDO"
+		sudo find . -name "$2"
+	;;
+
+
+	# Search for STRING (sudo optional)
         -s)
 		find . -type f -exec grep -l "$2" {} +
             ;;
+	-sr)
+		echo "search for string with SUDO"
+		sudo find . -type f -exec grep -l "$2" {} +
+	;;
+
+
+	# Usage
 	--help)
-		echo $0 "Usage: {-f|-s}"
+		echo $0 "Usage: {-f|-s|-r}"
 		echo "-f | searches for a FILENAME recursively"
 		echo "-s | searches for a STRING recursively"
+		echo "-r | adds sudo rights to command"
+		echo "e.g. 'serch -sr \"somestring\"'"
 	    ;;
         *)
-            echo "Usage: {-f|-s}"
+            echo "Usage: {-f|-s|-r|--help}"
             exit 1
 esac
