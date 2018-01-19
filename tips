@@ -1,0 +1,2 @@
+echo "dpkg -l #Gets PACKAGE information [Name, Version, Architecture, Description]"
+echo "grep #Parses out include/exclude lines from output"
