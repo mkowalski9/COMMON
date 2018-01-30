@@ -1,0 +1,81 @@
+####################
+#apt installs:
+#webmin
+
+#Apache mod_security
+
+	#INSTALL|
+	#64bit users please note - Because of this bug you need to create a symbolic link to libxml2.so.2 or the installation will report the file missing and fail
+	ln -s /usr/lib/x86_64-linux-gnu/libxml2.so.2 /usr/lib/libxml2.so.2
+
+	sudo apt install libxml2 libxml2-dev libxml2-utils
+	sudo apt install libaprutil1 libaprutil1-dev
+	sudo apt install libapache-mod-security
+
+	#CONFIGURE|
+	sudo mv /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecurity.conf
+	sudo pico /etc/modsecurity/modsecurity.conf
+		#SecRuleEngine On
+		#SecServerSignature FreeOSHTTP
+		#SecRequestBodyLimit 16384000
+		#SecRequestBodyInMemoryLimit 16384000
+
+	#INSTALL - OWASP| 
+	cd /tmp
+	sudo wgeti -O SpiderLabs-owasp-modsecurity-crs.tar.gz https://github.com/SpiderLabs/owasp-modsecurity-crs/tarball/master
+	sudo tar -zxvf SpiderLabs-owasp-modsecurity-crs.tar.gz
+	sudo cp -R SpiderLabs-owasp-modsecurity-crs-*/* /etc/modsecurity/
+	sudo rm SpiderLabs-owasp-modsecurity-crs.tar.gz
+	sudo rm -R SpiderLabs-owasp-modsecurity-crs-*
+	sudo mv /etc/modsecurity/modsecurity_crs_10_setup.conf.example /etc/modsecurity/modsecurity_crs_10_setup.conf
+
+
+	#Create Symolic Links
+	cd /etc/modsecurity/base_rules
+	for f in * ; do sudo ln -s /etc/modsecurity/base_rules/$f /etc/modsecurity/activated_rules/$f ; done
+	
+	cd /etc/modsecurity/optional_rules
+	for f in * ; do sudo ln -s /etc/modsecurity/optional_rules/$f /etc/modsecurity/activated_rules/$f ; done
+
+	#Add rules to Apache2
+	sudo pico /etc/apache2/mods-available/mod-security.conf
+		#Add to EOF
+		#Include "/etc/modsecurity/activated_rules/*.conf"
+
+	#Check if ModSecurity is enabled and restart Apache
+		#Before restarting Apache
+		sudo a2enmod headers
+		sudo a2enmod mod-security
+		
+		#restart apache
+
+	#Install ModEvasive
+	sudo apt install libapache2-mod-evasive
+
+	#Create log file directory for mod_evasive
+	sudo mkdir /var/log/mod_evasive
+	sudo chown www-data:www-data /var/log/mod_evasive/
+
+	#Cread mod-evasive.conf
+	sudo pico /etc/apache2/mod-available/mod-evasive.conf
+		#ADD
+		<ifmodule mod_evasive20.c>
+		  DOSHashTableSize 3097
+		  DOSPageCount 2
+		  DOSSiteCount 50
+		  DOSPageInterval 1
+		  DOSSiteInterval 1
+		  DOSBlockingPeriod 10
+		  DOSLogDir /var/log/mod_evasive
+		  DOSEmailNotify thordax@blackboxmk.com
+		  DOSWhitelist 127.0.0.1
+		</ifmodule>
+
+	#Fix mod-evasive email bug
+	sudo ln -s /etc/alternatives/mail /bin/mail/
+
+	#Check if ModEvasive is enable and restart Apache
+	sudo a2enmod mod-evasive
+	#restart apache
+
+	
