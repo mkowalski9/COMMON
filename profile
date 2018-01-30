@@ -71,4 +71,4 @@ git_branch() {
      git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
 }
 
-export PS1="$txtrst[$txtgrn\u$txtrst@$txtgrn\h$txtrst]$txtrst[$txtgrn\w$txtrst] $txtrst($txtylw\$(git_branch)$txtrst) $txtrst$ "
+export PS1="$txtrst[$txtgrn\u$txtrst@$txtgrn\h$txtrst]$txtrst[$txtpur\w$txtrst] $txtrst($txtylw\$(git_branch)$txtrst) $txtrst$ "
