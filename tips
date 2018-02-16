@@ -1,2 +1,16 @@
 echo "dpkg -l #Gets PACKAGE information [Name, Version, Architecture, Description]"
 echo "grep #Parses out include/exclude lines from output"
+
+
+###Stop Gnome from loading:
+
+#this worked
+sudo systemctl enable multi-user.target --force
+sudo systemctl set-default multi-user.target
+
+or
+
+#this didn't work for me
+sudo pico /etc/default/grub
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash" -> GRUB_CMDLINE_LINUX_DEFAULT="text"
+sudo update-grub
