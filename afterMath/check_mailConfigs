@@ -1,0 +1,7 @@
+### Useful tools to check for mail configuration
+
+# cat /etc/resolv.conf
+# cat /etc/network/interfaces
+# netstat -nr
+# ifconfig -a
+# dmesg | grep eth
