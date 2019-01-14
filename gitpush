@@ -1,0 +1,7 @@
+#!/bin/bash
+
+### GIT Add, Commit, and Push ###
+
+comment=$1
+
+sudo git add * ; sudo git commit -m "$comment" ; git push
