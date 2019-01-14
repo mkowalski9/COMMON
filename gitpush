@@ -4,4 +4,4 @@
 
 comment=$1
 
-sudo git add * ; sudo git commit -m "$comment" ; git push
+sudo git add * ; sudo git commit -m "$comment" ; sudo git push
