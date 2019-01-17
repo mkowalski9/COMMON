@@ -1,0 +1,9 @@
+#!/bin/bash
+
+username=$1
+
+echo "Connecting to blackboxmk.com as: $username"
+
+ssh $username@blackboxmk.com
+
+echo "Disconnecting from blackboxmk.com"
