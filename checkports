@@ -1,1 +1,2 @@
-sudo lsof -PiTCP -sTCP:LISTEN
+#sudo lsof -PiTCP -sTCP:LISTEN
+sudo nmap -sS localhost
