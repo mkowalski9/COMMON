@@ -1,2 +1,0 @@
-application=$1
-sudo apt-get purge $application

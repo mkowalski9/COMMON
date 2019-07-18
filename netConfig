@@ -1,5 +1,0 @@
-#!/bin/bash
-
-device=$(route | grep default | awk -F " " '{print $8}')
-
-sudo ethtool $device
