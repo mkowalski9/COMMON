@@ -1,0 +1,245 @@
+RESOURCE: https://askubuntu.com/questions/151440/important-things-to-do-after-installing-ubuntu-server
+
+ 19
+down vote
+accepted
+	
+Secure shared memory
+
+/dev/shm can be used in an attack against a running service, such as httpd. Modify /etc/fstab to make it more secure.
+
+Open a Terminal Window and enter the following :
+
+sudo vi /etc/fstab
+
+Add the following line and save. You will need to reboot for this setting to take effect :
+
+tmpfs     /dev/shm     tmpfs     defaults,noexec,nosuid     0     0
+
+Harden network with sysctl settings
+
+The /etc/sysctl.conf file contain all the sysctl settings. Prevent source routing of incoming packets and log malformed IP's enter the following in a terminal window
+
+sudo vi /etc/sysctl.conf
+
+Edit the /etc/sysctl.conf file and un-comment or add the following lines :
+
+# IP Spoofing protection
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+
+# Ignore ICMP broadcast requests
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+
+# Disable source packet routing
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv6.conf.all.accept_source_route = 0 
+net.ipv4.conf.default.accept_source_route = 0
+net.ipv6.conf.default.accept_source_route = 0
+
+# Ignore send redirects
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+
+# Block SYN attacks
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_max_syn_backlog = 2048
+net.ipv4.tcp_synack_retries = 2
+net.ipv4.tcp_syn_retries = 5
+
+# Log Martians
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+
+# Ignore ICMP redirects
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0 
+net.ipv6.conf.default.accept_redirects = 0
+
+# Ignore Directed pings
+net.ipv4.icmp_echo_ignore_all = 1
+
+To reload sysctl with the latest changes, enter:
+
+sudo sysctl -p
+
+Prevent IP Spoofing
+
+Open a Terminal and enter the following :
+
+sudo vi /etc/host.conf
+
+Add or edit the following lines :
+
+order bind,hosts
+nospoof on
+
+Harden PHP for security
+
+Edit the php.ini file :
+
+sudo vi /etc/php5/apache2/php.ini
+
+Add or edit the following lines :
+
+disable_functions = exec,system,shell_exec,passthru
+register_globals = Off
+expose_php = Off
+magic_quotes_gpc = On
+
+Web Application Firewall - ModSecurity
+
+http://www.thefanclub.co.za/how-to/how-install-apache2-modsecurity-and-modevasive-ubuntu-1204-lts-server
+Protect from DDOS (Denial of Service) attacks - ModEvasive
+
+http://www.thefanclub.co.za/how-to/how-install-apache2-modsecurity-and-modevasive-ubuntu-1204-lts-server
+Scan logs and ban suspicious hosts - DenyHosts and Fail2Ban
+@DenyHosts
+
+DenyHosts is a python program that automatically blocks SSH attacks by adding entries to /etc/hosts.deny. DenyHosts will also inform Linux administrators about offending hosts, attacked users and suspicious logins.
+
+Open a Terminal and enter the following :
+
+sudo apt-get install denyhosts
+
+After installation edit the configuration file /etc/denyhosts.conf and change the email, and other settings as required.
+
+To edit the admin email settings open a terminal window and enter:
+
+sudo vi /etc/denyhosts.conf
+
+Change the following values as required on your server :
+
+ADMIN_EMAIL = root@localhost
+SMTP_HOST = localhost
+SMTP_PORT = 25
+#SMTP_USERNAME=foo
+#SMTP_PASSWORD=bar
+SMTP_FROM = DenyHosts nobody@localhost
+#SYSLOG_REPORT=YES 
+
+@ Fail2Ban
+
+Fail2ban is more advanced than DenyHosts as it extends the log monitoring to other services including SSH, Apache, Courier, FTP, and more.
+
+Fail2ban scans log files and bans IPs that show the malicious signs -- too many password failures, seeking for exploits, etc.
+
+Generally Fail2Ban then used to update firewall rules to reject the IP addresses for a specified amount of time, although any arbitrary other action could also be configured. Out of the box Fail2Ban comes with filters for various services (apache, courier, ftp, ssh, etc).
+
+Open a Terminal and enter the following :
+
+sudo apt-get install fail2ban
+
+After installation edit the configuration file /etc/fail2ban/jail.local and create the filter rules as required.
+
+To edit the settings open a terminal window and enter:
+
+sudo vi /etc/fail2ban/jail.conf
+
+Activate all the services you would like fail2ban to monitor by changing enabled = false to *enabled = true*
+
+For example if you would like to enable the SSH monitoring and banning jail, find the line below and change enabled from false to true. Thats it.
+
+[ssh]
+
+enabled  = true
+port     = ssh
+filter   = sshd
+logpath  = /var/log/auth.log
+maxretry = 3
+
+If you would like to receive emails from Fail2Ban if hosts are banned change the following line to your email address.
+
+destemail = root@localhost
+
+and change the following line from :
+
+action = %(action_)s
+
+to:
+
+action = %(action_mwl)s
+
+You can also create rule filters for the various services that you would like fail2ban to monitor that is not supplied by default.
+
+sudo vi /etc/fail2ban/jail.local
+
+Good instructions on how to configure fail2ban and create the various filters can be found on HowtoForge - click here for an example
+
+When done with the configuration of Fail2Ban restart the service with :
+
+sudo /etc/init.d/fail2ban restart
+
+You can also check the status with.
+
+sudo fail2ban-client status
+
+Check for rootkits - RKHunter and CHKRootKit.
+
+Both RKHunter and CHKRootkit basically do the same thing - check your system for rootkits. No harm in using both.
+
+Open a Terminal and enter the following :
+
+sudo apt-get install rkhunter chkrootkit
+
+To run chkrootkit open a terminal window and enter :
+
+sudo chkrootkit
+
+To update and run RKHunter. Open a Terminal and enter the following
+
+sudo rkhunter --update
+sudo rkhunter --propupd
+sudo rkhunter --check
+
+Scan open ports - Nmap
+
+Nmap ("Network Mapper") is a free and open source utility for network discovery and security auditing.
+
+Open a Terminal and enter the following :
+
+sudo apt-get install nmap
+
+Scan your system for open ports with :
+
+nmap -v -sT localhost
+
+SYN scanning with the following :
+
+sudo nmap -v -sS localhost
+
+Analyse system LOG files - LogWatch
+
+Logwatch is a customizable log analysis system. Logwatch parses through your system's logs and creates a report analyzing areas that you specify. Logwatch is easy to use and will work right out of the package on most systems.
+
+Open a Terminal and enter the following :
+
+sudo apt-get install logwatch libdate-manip-perl
+
+To view logwatch output use less :
+
+sudo logwatch | less
+
+To email a logwatch report for the past 7 days to an email address, enter the following and replace mail@domain.com with the required email. :
+
+sudo logwatch --mailto mail@domain.com --output mail --format html --range 'between -7 days and today' 
+
+Audit your system security - Tiger.
+
+Tiger is a security tool that can be use both as a security audit and intrusion detection system.
+
+Open a Terminal and enter the following :
+
+sudo apt-get install tiger
+
+To run tiger enter :
+
+sudo tiger
+
+All Tiger output can be found in the /var/log/tiger
+
+To view the tiger security reports, open a Terminal and enter the following :
+
+sudo less /var/log/tiger/security.report.*
+
